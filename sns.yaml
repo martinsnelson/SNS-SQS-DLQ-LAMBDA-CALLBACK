@@ -23,6 +23,11 @@ Resources:
       QueueName: "MyQueue.fifo"
       FifoQueue: true
       ContentBasedDeduplication: true
+      RedrivePolicy:
+        deadLetterTargetArn:
+          - "DLQSQSQueue"
+          - "Arn"
+        maxReceiveCount: 3
   SQSQueueSubscription:
      Type: AWS::SNS::Subscription
      Properties:
@@ -34,6 +39,13 @@ Resources:
        FilterPolicy:
          product_type:
            - 1
+# DLQSQSQueue
+  DLQSQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: "DLQSQSQueue.fifo"
+      FifoQueue: true
+      ContentBasedDeduplication: true
 # Queue2
 #  SQSQueue2:
 #    Type: AWS::SQS::Queue
@@ -76,3 +88,15 @@ Outputs:
 # https://docs.aws.amazon.com/pt_br/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-short-and-long-polling.html
 # https://docs.aws.amazon.com/pt_br/AWSSimpleQueueService/latest/SQSDeveloperGuide/avoding-processing-duplicates-in-multiple-producer-consumer-system.html
 # https://docs.aws.amazon.com/pt_br/AWSSimpleQueueService/latest/SQSDeveloperGuide/avoid-backlog-with-the-same-message-group-id.html
+
+# {
+  # "name":"Camila"
+# }
+
+# product_type
+# help
+# https://docs.aws.amazon.com/pt_br/AWSCloudFormation/latest/UserGuide/aws-resource-sns-subscription.html
+# https://docs.aws.amazon.com/sns/latest/dg/fifo-topic-code-examples.html#fifo-topic-cfn
+# https://docs.aws.amazon.com/sns/latest/dg/SendMessageToSQS.cloudformation.html
+# https://docs.aws.amazon.com/pt_br/AWSCloudFormation/latest/UserGuide/aws-resource-sns-topic.html#cfn-sns-topic-tracingconfigk
+# https://docs.aws.amazon.com/pt_br/AWSCloudFormation/latest/UserGuide/aws-resource-sqs-queue.html
