@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "SampleTopic.fifo"
+      ContentBasedDeduplication: true
+      FifoTopic: true
+#      Subscription:
+#        - Endpoint: !GetAtt MyQueue1.Arn
+#          Protocol: sqs
+#        - Endpoint: !GetAtt MyQueue2.Arn
+#          Protocol: sqs
+      Tags:
+        - Key: "1"
+          Value: "king"
+        - Key: "2"
+          Value: "two"
+# Queue1
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: "MyQueue.fifo"
+      FifoQueue: true
+      ContentBasedDeduplication: true
+  SQSQueueSubscription:
+     Type: AWS::SNS::Subscription
+     Properties:
+       TopicArn: !Ref SNSTopic
+       Endpoint: !GetAtt SQSQueue.Arn
+       Protocol: sqs
+       RawMessageDelivery: false
+       FilterPolicyScope: MessageAttributes
+       FilterPolicy:
+         product_type:
+           - 1
+# Queue2
+#  SQSQueue2:
+#    Type: AWS::SQS::Queue
+#    Properties:
+#      QueueName: "MyQueue2.fifo"
+#      FifoQueue: true
+#      ContentBasedDeduplication: true
+#  SQSQueue2Subscription:
+#     Type: AWS::SNS::Subscription
+#     Properties:
+#       TopicArn: !Ref SNSTopic
+#       Endpoint: !GetAtt SQSQueue2.Arn
+#       Protocol: sqs
+#       RawMessageDelivery: false
+#       FilterPolicyScope: MessageBody
+#       FilterPolicy:
+#         product_type:
+#           - 1     
+Outputs:
+# Outputs SNS
+  TopicArn:
+    Description: The ARN of the created SNS topic
+    Value: !Ref SNSTopic
+  TopicName:
+    Description: The name of the created SNS topic
+    Value: "SampleTopic.fifo"
+# Outputs SQS
+  QueueName:
+    Description: The name of the queue
+    Value: !GetAtt SQSQueue.QueueName
+  QueueURL:
+    Description: The URL of the queue
+    Value: !Ref SQSQueue
+  QueueARN:
+    Description: The ARN of the queue
+    Value: !GetAtt SQSQueue.Arn
+# create-sns-sqs-subscription-sqs-with-dlq-and-callback
+# https://docs.aws.amazon.com/pt_br/AWSSimpleQueueService/latest/SQSDeveloperGuide/best-practices-processing-messages-timely-manner.html
+# https://docs.aws.amazon.com/pt_br/AWSSimpleQueueService/latest/SQSDeveloperGuide/best-practices-setting-up-long-polling.html
+# https://docs.aws.amazon.com/pt_br/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-short-and-long-polling.html
+# https://docs.aws.amazon.com/pt_br/AWSSimpleQueueService/latest/SQSDeveloperGuide/avoding-processing-duplicates-in-multiple-producer-consumer-system.html
+# https://docs.aws.amazon.com/pt_br/AWSSimpleQueueService/latest/SQSDeveloperGuide/avoid-backlog-with-the-same-message-group-id.html
